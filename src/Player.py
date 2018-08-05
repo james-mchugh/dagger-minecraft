@@ -41,6 +41,27 @@ TSTAMP_DELIM = ": "
 #
 DELAY_TIME = 0.1
 
+# moving
+#
+MOVE_FORWARD = "W"
+MOVE_BACKWARD = "S"
+STRAFE_LEFT = "A"
+STRAFE_RIGHT = "D"
+TURN_LEFT = "Q"
+TURN_RIGHT = "E"
+NO_ACTION = "X"
+
+MOVE_INSTRUCTIONS = (
+    "{:s}\n\t{:s}\n\t{:s}\n\t{:s}\n\t{:s}\n\t{:s}\n\t{:s}\n\t{:s}"
+    .format("Commands:",
+            "{:s} -> forward".format(MOVE_FORWARD),
+            "{:s} -> Strafe left".format(MOVE_BACKWARD),
+            "{:s} -> Strafe right".format(STRAFE_LEFT),
+            "{:s} -> backward".format(STRAFE_RIGHT),
+            "{:s} -> turn counterclockwise 90 degrees".format(TURN_LEFT),
+            "{:s} -> turn clockwise 90 degrees".format(TURN_RIGHT),
+            "{:s} -> No action".format(NO_ACTION)))
+
 # ------------------------------------------------------------------------------
 #
 # class
@@ -56,12 +77,12 @@ class Player:
     #
     # ----------------------------------
 
-    def __init__(self, mission_file):
+    def __init__(self, mission_file, action_delay=DELAY_TIME):
 
         # try to open the file
         #
         try:
-            f= open(mission_file, "r")
+            f = open(mission_file, "r")
         except IOError:
             print("Unable to open file {:s}".format(mission_file))
             raise
@@ -70,6 +91,11 @@ class Player:
         #
         self.mission = mp.MissionSpec(f.read(), True)
         self.agent = mp.AgentHost()
+
+        # switch-like object for making decisions on movement
+        #
+        self.getAction = self.getAction()
+        self.action_delay = action_delay
 
         # close the file
         #
@@ -114,7 +140,7 @@ class Player:
         # end of while
     #
     # end of method
-    
+
     # method: watch
     #
     # arguments: none
@@ -128,7 +154,7 @@ class Player:
         # variable to store observations
         #
         obs = []
-        
+
         # get the world state and loop while the mission is going
         #
         world_state = self.agent.getWorldState()
@@ -148,7 +174,7 @@ class Player:
     #
     # end of function
 
-    # method: keyboard_listener
+    # method: listen_and_react_loop
     #
     # arguments:none
     #
@@ -158,48 +184,26 @@ class Player:
     #
     # listens to keyboard inputs and controls agent
     #
-    def keyboard_listener(self):
+    def listen_and_react_loop(self):
 
         # lists for outputs
         #
         actions = []
         states = []
 
-        # for getting input
-        #
-        getch = _Getch()
-        
         # loop while the mission is running
         #
         world_state = self.agent.getWorldState()
         while world_state.is_mission_running:
 
-            # get keyboard input
+            # get keyboard input and move
             #
-            print("{:s}\n\t{:s}\n\t{:s}\n\t{:s}\n\t{:s}\n\t{:s}\n\t{:s}"
-                  .format("Commands:",
-                          "W -> forward",
-                          "A -> Straffe left",
-                          "D -> Straffe right",
-                          "S -> backward",
-                          "Q -> turn counterclockwise 90 degrees",
-                          "E -> turn clockwise 90 degrees"))
-
-            user_input = str(getch()).upper()
-
-            # branch on user input
-            #
-            if not self.act(user_input):
-                print("{:s} is an invalid character")
-
-            # wait a bit
-            #
-            time.sleep(DELAY_TIME)
+            act = self.listen_and_react_once()
 
             # store world state and actions
             #
             states.append(world_state)
-            actions.append(user_input)
+            actions.append(act)
 
             # get the world state
             #
@@ -212,9 +216,44 @@ class Player:
         return actions, states
     #
     # end of method
-    
 
-    # method: act
+    # method: listen_and_react
+    #
+    # arguments:none
+    #
+    # return:
+    #  actions: list of keyboard commands used
+    #  states: list of world states
+    #
+    # listens to keyboard inputs and controls agent
+    #
+    def listen_and_react_once(self):
+
+        # for getting input
+        #
+        getch = _Getch()
+
+        # get keyboard input
+        #
+        print(MOVE_INSTRUCTIONS)
+        user_input = str(getch()).upper()
+
+        # branch on user input
+        #
+        if not self.react(user_input):
+            print("{:s} is an invalid character")
+
+        # wait a bit
+        #
+        time.sleep(self.action_delay)
+
+        # return everything
+        #
+        return self.getAction(user_input)
+    #
+    # end of method
+
+    # method: react
     #
     # argument: user input
     #
@@ -222,17 +261,18 @@ class Player:
     #
     # sends user input to agent
     #
-    def act(self, user_input):
-        getAction = self.getAction()
-        action = getAction(user_input)
-        if action:
+    def react(self, user_input):
+        action = self.getAction(user_input)
+        if action is None:
+            return True
+        elif action:
             self.agent.sendCommand(action)
             return True
         else:
             return False
     #
     # end of function
-    
+
     # method: translate_pos_to_command
     #
     # arguments:
@@ -267,12 +307,13 @@ class Player:
         def __init__(self):
 
             self.switch = {
-                "W": "move 1",
-                "S": "move -1",
-                "A": "strafe -1",
-                "D": "strafe 1",
-                "Q": "turn -1",
-                "E": "turn 1"
+                MOVE_FORWARD: "move 1",
+                MOVE_BACKWARD: "move -1",
+                STRAFE_LEFT: "strafe -1",
+                STRAFE_RIGHT: "strafe 1",
+                TURN_LEFT: "turn -1",
+                TURN_RIGHT: "turn 1",
+                NO_ACTION: None
             }
 
         def __call__(self, user_input):
