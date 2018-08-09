@@ -13,9 +13,9 @@
       <FlatWorldGenerator generatorString="3;7,220*1,5*3,2;3;,biome_1"/>
       <DrawingDecorator>
         <!-- coordinates for cuboid are inclusive -->
-        <DrawCuboid x1="-2" y1="46" z1="-2" x2="7" y2="50" z2="13" type="air" />            <!-- limits of our arena -->
-        <DrawCuboid x1="-2" y1="45" z1="-2" x2="7" y2="45" z2="13" type="lava" />           <!-- lava floor -->
-        <DrawCuboid x1="1"  y1="45" z1="1"  x2="3" y2="45" z2="17" type="sandstone" />      <!-- floor of the arena -->
+        <DrawCuboid x1="-189" y1="226" z1="191" x2="-149" y2="226" z2="151" type="lava" />           <!-- lava floor -->
+        <DrawCuboid x1="-186" y1="226" z1="188" x2="-152" y2="226" z2="154" type="diamond_block" />  <!-- floor of the arena -->
+	<DrawCuboid x1="-183" y1="226" z1="185" x2="-155" y2="226" z2="157" type="lava" />           <!-- lava floor -->
         <DrawBlock x="4"  y="45" z="1" type="cobblestone" />    <!-- the starting marker -->
         <DrawBlock x="4"  y="45" z="7" type="lapis_block" />     <!-- the destination marker -->
       </DrawingDecorator>
@@ -25,9 +25,9 @@
   </ServerSection>
 
   <AgentSection mode="Survival">
-    <Name>Cristina</Name>
+    <Name>Frisk</Name>
     <AgentStart>
-      <Placement x="4.5" y="46.0" z="1.5" pitch="30" yaw="0"/>
+      <Placement x="-153.5" y="227.0" z="155.5" pitch="30" yaw="0"/>
     </AgentStart>
     <AgentHandlers>
       <DiscreteMovementCommands/>

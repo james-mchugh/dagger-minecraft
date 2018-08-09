@@ -58,7 +58,7 @@ NEW_IMAGE_SIZE = (256, 256)
 
 # mission xml file and delay time between actions
 #
-MISSION_FILE = "mission.xml"
+MISSION_FILE = "../config/mission.xml"
 DELAY_TIME = 0.1
 
 
