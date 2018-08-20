@@ -184,7 +184,7 @@ class Player:
     #
     # listens to keyboard inputs and controls agent
     #
-    def listen_and_react_loop(self):
+    def listen_and_react_loop(self, limit_to=None, move_forward=False):
 
         # lists for outputs
         #
@@ -194,20 +194,32 @@ class Player:
         # loop while the mission is running
         #
         world_state = self.agent.getWorldState()
+
         while world_state.is_mission_running:
-
-            # get keyboard input and move
-            #
-            act = self.listen_and_react_once()
-
-            # store world state and actions
-            #
-            states.append(world_state)
-            actions.append(act)
 
             # get the world state
             #
+            world_state = self.agent.peekWorldState()
+            while world_state.number_of_video_frames_since_last_state < 1:
+                world_state = self.agent.peekWorldState()
+                time.sleep(0.1)
             world_state = self.agent.getWorldState()
+
+            # get keyboard input and move
+            #
+            act = self.listen_and_react_once(limit_to)
+
+            # move forward
+            #
+            if (act is None or act) and move_forward:
+                self.react(MOVE_FORWARD)
+
+            # store world state and actions
+            #
+            if act is None or act:
+                states.append(world_state)
+                actions.append(act)
+
         #
         # end of while
 
@@ -219,7 +231,8 @@ class Player:
 
     # method: listen_and_react
     #
-    # arguments:none
+    # arguments:
+    #  limit_to: optional argument if you only want to allow certain keys
     #
     # return:
     #  actions: list of keyboard commands used
@@ -227,7 +240,7 @@ class Player:
     #
     # listens to keyboard inputs and controls agent
     #
-    def listen_and_react_once(self):
+    def listen_and_react_once(self, limit_to=None):
 
         # for getting input
         #
@@ -240,8 +253,10 @@ class Player:
 
         # branch on user input
         #
-        if not self.react(user_input):
-            print("{:s} is an invalid character")
+        if ((limit_to and user_input not in limit_to) or not
+            self.react(user_input)):
+            print("{:s} is an invalid character".format(user_input))
+            return False
 
         # wait a bit
         #

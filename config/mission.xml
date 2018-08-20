@@ -19,7 +19,7 @@
         <DrawBlock x="4"  y="45" z="1" type="cobblestone" />    <!-- the starting marker -->
         <DrawBlock x="4"  y="45" z="7" type="lapis_block" />     <!-- the destination marker -->
       </DrawingDecorator>
-      <ServerQuitFromTimeUp timeLimitMs="20000"/>
+      <ServerQuitFromTimeUp timeLimitMs="60000"/>
       <ServerQuitWhenAnyAgentFinishes/>
     </ServerHandlers>
   </ServerSection>
@@ -41,6 +41,10 @@
           <Block type="lava" />
           <Block type="lapis_block" />
       </AgentQuitFromTouchingBlockType>
+      <VideoProducer>
+        <Width>480</Width>
+        <Height>360</Height>
+      </VideoProducer>
     </AgentHandlers>
   </AgentSection>
 
